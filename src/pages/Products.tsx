@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Star } from "lucide-react";
+import { Star, MessageCircle, MapPin, Truck, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import type { Database } from "@/integrations/supabase/types";
@@ -95,7 +96,14 @@ export default function Products() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {products.map(p => (
             <Card key={p.id} className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setSelected(p); fetchReviews(p.id); }}>
-              {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-40 object-cover" />}
+              <div className="relative">
+                {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-40 object-cover" />}
+                {p.discount_percent > 0 && (
+                  <Badge className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                    {p.discount_percent}% OFF
+                  </Badge>
+                )}
+              </div>
               <CardContent className="pt-4">
                 <h3 className="font-semibold">{p.name}</h3>
                 <p className="text-sm text-muted-foreground capitalize">{p.category}</p>
@@ -103,11 +111,6 @@ export default function Products() {
                   <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full">
                     Items left: {p.quantity}
                   </span>
-                  {p.discount_percent > 0 && (
-                    <span className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-full animate-pulse">
-                      SAVE {p.discount_percent}%
-                    </span>
-                  )}
                 </div>
                 {p.avg_rating ? (
                   <div className="flex items-center gap-1 mt-1">
@@ -116,6 +119,7 @@ export default function Products() {
                   </div>
                 ) : null}
                 <p className="font-bold text-primary mt-2">UGX {p.price.toLocaleString()}/{p.unit}</p>
+                <Button className="w-full mt-4" variant="outline">See details</Button>
               </CardContent>
             </Card>
           ))}
@@ -128,27 +132,79 @@ export default function Products() {
           {selected && (
             <>
               <DialogHeader><DialogTitle>{selected.name}</DialogTitle></DialogHeader>
-              {selected.image_url && <img src={selected.image_url} alt={selected.name} className="w-full h-48 object-cover rounded-lg" />}
+              <div className="relative">
+                {selected.image_url && <img src={selected.image_url} alt={selected.name} className="w-full h-48 object-cover rounded-lg" />}
+                {selected.discount_percent > 0 && (
+                  <Badge className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-sm shadow animate-pulse">
+                    {selected.discount_percent}% OFF
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground">{selected.description}</p>
               <div className="flex justify-between items-center">
                 <p className="font-bold text-primary text-xl">UGX {selected.price.toLocaleString()}/{selected.unit}</p>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-orange-600">{selected.quantity} {selected.unit} left in stock</p>
-                  {selected.discount_percent > 0 && (
-                    <p className="text-sm font-bold text-red-500">Discount: {selected.discount_percent}% OFF</p>
-                  )}
                 </div>
               </div>
 
-              {reviews.length > 0 && (
+              <div className="bg-muted/30 rounded-lg p-4 space-y-3 mt-4 border">
+                <h4 className="font-semibold flex items-center gap-2"><Truck className="h-4 w-4 text-primary" /> Delivery & Shipping</h4>
+                <div className="text-sm space-y-2 text-muted-foreground">
+                   <div className="flex items-start gap-2">
+                     <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
+                     <p><strong>Pickup Stations:</strong> Available at Kabale Central Market, Mwanjari, Eso, and more.<br/>
+                     <span className="text-xs text-primary font-medium">Ready in 2-4 hours from order time.</span></p>
+                   </div>
+                   <div className="flex items-start gap-2">
+                     <Truck className="h-4 w-4 mt-0.5 shrink-0" />
+                     <p><strong>Home Delivery:</strong> Estimated UGX 2,000 - 5,000 depending on distance.</p>
+                   </div>
+                </div>
+
                 <div className="border-t pt-3 mt-3">
-                  <h4 className="font-semibold mb-2">Reviews</h4>
-                  {reviews.map(r => (
-                    <div key={r.id} className="mb-2 text-sm">
-                      <div className="flex items-center gap-1">{"⭐".repeat(r.rating)} <span className="text-muted-foreground">— {(r as any).profiles?.full_name || "Buyer"}</span></div>
-                      {r.comment && <p className="text-muted-foreground ml-1">{r.comment}</p>}
-                    </div>
-                  ))}
+                  <h4 className="font-semibold flex items-center gap-2 mb-2"><ShieldCheck className="h-4 w-4 text-green-600" /> Returns Policy</h4>
+                  <ul className="text-xs text-muted-foreground list-disc pl-5 space-y-1">
+                    <li>Inspect produce immediately upon delivery or pickup.</li>
+                    <li>Eligible for return within 24 hours if spoiled or damaged.</li>
+                    <li>Refunds are processed to your Mobile Money account within 1-2 business days.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <Button variant="outline" className="w-full gap-2 mt-2" onClick={(e) => {
+                 e.preventDefault();
+                 toast({ title: "Chat Opened", description: `Starting chat with ${selected.farmer_name || "the farmer"}...` });
+              }}>
+                <MessageCircle className="h-4 w-4" /> Ask {selected.farmer_name || "Farmer"} a Question
+              </Button>
+
+              {reviews.length > 0 && (
+                <div className="border-t pt-4 mt-4">
+                  <h4 className="font-semibold mb-3">Product Ratings & Reviews</h4>
+                  <div className="space-y-4">
+                    {reviews.map(r => (
+                      <div key={r.id} className="text-sm bg-muted/20 p-3 rounded-lg border">
+                        <div className="flex justify-between items-start mb-1">
+                          <div>
+                            <div className="flex items-center gap-1 font-medium mb-1">
+                              {(r as any).profiles?.full_name || "Buyer"}
+                              <Badge variant="secondary" className="text-[10px] h-5 px-1.5 flex items-center gap-1 bg-green-50 text-green-700 border-green-200">
+                                <CheckCircle2 className="h-3 w-3" /> Verified Purchaser
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <Star key={star} className={`h-3 w-3 ${star <= r.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} />
+                              ))}
+                            </div>
+                          </div>
+                          <span className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
+                        </div>
+                        {r.comment && <p className="text-muted-foreground mt-2 italic">"{r.comment}"</p>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

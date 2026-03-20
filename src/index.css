@@ -3,6 +3,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @layer base {
   :root {
     --background: 40 33% 97%;
@@ -78,9 +79,7 @@
     --sidebar-border: 150 12% 18%;
     --sidebar-ring: 33 80% 55%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -90,7 +89,9 @@
     font-family: 'DM Sans', sans-serif;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-family: 'Playfair Display', serif;
   }
 }
