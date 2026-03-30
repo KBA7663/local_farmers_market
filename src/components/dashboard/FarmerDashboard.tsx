@@ -19,7 +19,7 @@ type Product = Database["public"]["Tables"]["products"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 
 const categories = ["vegetables", "fruits", "grains", "dairy", "livestock"] as const;
-const units = ["kg", "g", "pieces", "heads", "litres", "bunches", "bags", "crates", "trays", "tonnes", "bundles", "baskets", "dozen", "sacks"] as const;
+const units = ["kg", "head"] as const;
 
 export default function FarmerDashboard() {
   const { user, profile, refreshProfile } = useAuth();
@@ -27,7 +27,7 @@ export default function FarmerDashboard() {
   const [orders, setOrders] = useState<(Order & { product_name?: string; buyer_name?: string; buyer_phone?: string })[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", category: "vegetables" as string, quantity: "", unit: "kg", image_url: "", discount_percent: "0" });
+  const [form, setForm] = useState({ name: "", description: "", price: "", category: "vegetables" as string, quantity: "", unit: "kg", image_url: "" });
   const [profileForm, setProfileForm] = useState({ full_name: "", phone: "", location: "" });
   const [uploading, setUploading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -109,7 +109,6 @@ export default function FarmerDashboard() {
       quantity: parseInt(form.quantity),
       unit: form.unit,
       image_url: form.image_url,
-      discount_percent: parseInt(form.discount_percent || "0"),
       farmer_id: user.id,
     };
 
@@ -124,7 +123,7 @@ export default function FarmerDashboard() {
     }
     setDialogOpen(false);
     setEditingProduct(null);
-    setForm({ name: "", description: "", price: "", category: "vegetables", quantity: "", unit: "kg", image_url: "", discount_percent: "0" });
+    setForm({ name: "", description: "", price: "", category: "vegetables", quantity: "", unit: "kg", image_url: "" });
     setImagePreview(null);
     fetchProducts();
   };
@@ -157,14 +156,14 @@ export default function FarmerDashboard() {
 
   const openEdit = (p: Product) => {
     setEditingProduct(p);
-    setForm({ name: p.name, description: p.description || "", price: String(p.price), category: p.category, quantity: String(p.quantity), unit: p.unit, image_url: p.image_url || "", discount_percent: String(p.discount_percent || 0) });
+    setForm({ name: p.name, description: p.description || "", price: String(p.price), category: p.category, quantity: String(p.quantity), unit: p.unit, image_url: p.image_url || "" });
     setImagePreview(p.image_url || null);
     setDialogOpen(true);
   };
 
   const openNew = () => {
     setEditingProduct(null);
-    setForm({ name: "", description: "", price: "", category: "vegetables", quantity: "", unit: "kg", image_url: "", discount_percent: "0" });
+    setForm({ name: "", description: "", price: "", category: "vegetables", quantity: "", unit: "kg", image_url: "" });
     setImagePreview(null);
     setDialogOpen(true);
   };
@@ -208,10 +207,7 @@ export default function FarmerDashboard() {
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div><Label>Quantity</Label><Input type="number" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} required /></div>
-                  <div><Label>Discount (%)</Label><Input type="number" min="0" max="100" value={form.discount_percent} onChange={e => setForm(f => ({ ...f, discount_percent: e.target.value }))} /></div>
-                </div>
+                <div><Label>Quantity</Label><Input type="number" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} required /></div>
                 <div><Label>Unit</Label>
                   <Select value={form.unit} onValueChange={v => setForm(f => ({ ...f, unit: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -256,7 +252,6 @@ export default function FarmerDashboard() {
                   <p className="font-bold text-primary">UGX {p.price.toLocaleString()}/{p.unit}</p>
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Stock: {p.quantity} {p.unit}</span>
-                    {p.discount_percent > 0 && <span className="text-accent font-medium">{p.discount_percent}% Off</span>}
                   </div>
                   <div className="flex gap-2 mt-3">
                     <Button size="sm" variant="outline" onClick={() => openEdit(p)}>Edit</Button>

@@ -80,7 +80,6 @@ export type Database = {
           quantity: number
           status: Database["public"]["Enums"]["product_status"]
           unit: string
-          discount_percent: number
           updated_at: string
         }
         Insert: {
@@ -95,7 +94,6 @@ export type Database = {
           quantity?: number
           status?: Database["public"]["Enums"]["product_status"]
           unit?: string
-          discount_percent?: number
           updated_at?: string
         }
         Update: {
@@ -110,7 +108,6 @@ export type Database = {
           quantity?: number
           status?: Database["public"]["Enums"]["product_status"]
           unit?: string
-          discount_percent?: number
           updated_at?: string
         }
         Relationships: []

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-import { Users, Package, ShoppingCart, MessageSquare, BarChart3, Trash2 } from "lucide-react";
+import { Users, Package, ShoppingCart, MessageSquare, BarChart3, Trash2, Printer, Download } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -123,6 +123,35 @@ export default function AdminDashboard() {
   const productsByCategory = ["vegetables", "fruits", "grains", "dairy", "livestock"].map(c => ({
     name: c, count: products.filter(p => p.category === c).length,
   }));
+
+  const handleDownloadCSV = () => {
+    const rows = [
+      ["System Report", ""],
+      ["Date", new Date().toLocaleDateString()],
+      ["", ""],
+      ["Metric", "Value"],
+      ["Total Users", users.length],
+      ["Total Products", products.length],
+      ["Total Orders", orders.length],
+      ["Total Revenue (UGX)", totalRevenue],
+      ["", ""],
+      ["Orders by Status", "Count"],
+      ...ordersByStatus.map(s => [s.name, s.count]),
+      ["", ""],
+      ["Products by Category", "Count"],
+      ...productsByCategory.map(c => [c.name, c.count])
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+      
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `system_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="p-6">
@@ -271,7 +300,18 @@ export default function AdminDashboard() {
           </Table>
         </TabsContent>
 
-        <TabsContent value="reports" className="mt-4">
+        <TabsContent value="reports" className="mt-4 print:mt-0">
+          <div className="flex justify-between items-center mb-4 print:hidden">
+            <h2 className="text-xl font-semibold">System Reports Overview</h2>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => window.print()} className="gap-2">
+                <Printer className="h-4 w-4" /> Print
+              </Button>
+              <Button onClick={handleDownloadCSV} className="gap-2">
+                <Download className="h-4 w-4" /> Download CSV
+              </Button>
+            </div>
+          </div>
           <div className="grid md:grid-cols-2 gap-6">
             <Card>
               <CardHeader><CardTitle className="text-lg">Orders by Status</CardTitle></CardHeader>

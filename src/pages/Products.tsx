@@ -73,8 +73,15 @@ export default function Products() {
       payment_method: paymentMethod,
     });
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    
+    const newQuantity = selected.quantity - qty;
+    
+    // Local state update (database handles actual reduction via trigger)
+    setProducts(prev => prev.map(p => p.id === selected.id ? { ...p, quantity: newQuantity } : p));
+
     toast({ title: "Order placed!", description: `UGX ${total.toLocaleString()}` });
     setSelected(null);
+    setOrderQty("1");
   };
 
   return (
@@ -98,11 +105,6 @@ export default function Products() {
             <Card key={p.id} className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onClick={() => { setSelected(p); fetchReviews(p.id); }}>
               <div className="relative">
                 {p.image_url && <img src={p.image_url} alt={p.name} className="w-full h-40 object-cover" />}
-                {p.discount_percent > 0 && (
-                  <Badge className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white animate-pulse">
-                    {p.discount_percent}% OFF
-                  </Badge>
-                )}
               </div>
               <CardContent className="pt-4">
                 <h3 className="font-semibold">{p.name}</h3>
@@ -134,11 +136,6 @@ export default function Products() {
               <DialogHeader><DialogTitle>{selected.name}</DialogTitle></DialogHeader>
               <div className="relative">
                 {selected.image_url && <img src={selected.image_url} alt={selected.name} className="w-full h-48 object-cover rounded-lg" />}
-                {selected.discount_percent > 0 && (
-                  <Badge className="absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white px-3 py-1 text-sm shadow animate-pulse">
-                    {selected.discount_percent}% OFF
-                  </Badge>
-                )}
               </div>
               <p className="text-muted-foreground">{selected.description}</p>
               <div className="flex justify-between items-center">
